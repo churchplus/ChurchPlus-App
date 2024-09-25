@@ -5,114 +5,121 @@
  * @format
  */
 
-import React from 'react';
-import type {PropsWithChildren} from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import {
+  BackHandler,
+  Dimensions,
   SafeAreaView,
-  ScrollView,
   StatusBar,
   StyleSheet,
-  Text,
-  useColorScheme,
   View,
+  ActivityIndicator,
+  TouchableOpacity,
+  Text,
+  Image
 } from 'react-native';
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+import { WebView } from 'react-native-webview';
+import * as Animatable from 'react-native-animatable';
+const { width, height } = Dimensions.get('screen');
 
-type SectionProps = PropsWithChildren<{
-  title: string;
-}>;
-
-function Section({children, title}: SectionProps): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
+const SplashScreen = () => {
   return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
+    <View style={{ width, height, flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
+      <Animatable.View
+        animation={'zoomInDown'}
+        duration={4000}
+      >
+        <Image source={require('./assets/churchplusblueLogo.png')} style={{ width: width / 2 }} resizeMode='contain' />
+      </Animatable.View>
+    </View>
+  )
+}
+const AppWrapper = (): React.JSX.Element => {
+  const webViewRef = useRef()
+  const [canGoBack, setCanGoBack] = useState(false)
+  const [canGoForward, setCanGoForward] = useState(false)
+  const [currentUrl, setCurrentUrl] = useState('')
+  const [splash, setsplash] = useState(true)
+
+  const backButtonHandler = () => {
+    if (webViewRef.current) webViewRef.current.goBack()
+    return true;
+  }
+
+  const frontButtonHandler = () => {
+    if (webViewRef.current) webViewRef.current.goForward()
+  }
+
+  useEffect(() => {
+    setTimeout(() => {
+      setsplash(false)
+    }, 4000);
+    BackHandler.addEventListener("hardwareBackPress", backButtonHandler)
+    return () => {
+      BackHandler.removeEventListener("hardwareBackPress", backButtonHandler)
+    };
+  }, []);
+
+  return (
+    <View style={styles.appWrapper}>
+      {
+        splash ? (
+          <SplashScreen />
+        ) : (
+          <WebView
+            ref={webViewRef}
+            source={{ uri: 'https://my.churchplus.co' }}
+            style={styles.webView}
+            startInLoadingState={true}
+            renderLoading={() => (
+              <View style={styles.flexContainer}>
+                <ActivityIndicator
+                  color='black'
+                  size='large'
+                />
+              </View>
+            )}
+            onNavigationStateChange={navState => {
+              setCanGoBack(navState.canGoBack)
+              setCanGoForward(navState.canGoForward)
+              setCurrentUrl(navState.url)
+            }}
+          />
+        )
+      }
     </View>
   );
 }
 
 function App(): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
-  };
-
   return (
-    <SafeAreaView style={backgroundStyle}>
+    <SafeAreaView>
       <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
+        barStyle={'dark-content'}
+        backgroundColor={"#ffffff"}
       />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
-      </ScrollView>
+      <View>
+        <AppWrapper />
+      </View>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
+  appWrapper: {
+    backgroundColor: '#ffffff',
+    height: Dimensions.get("window").height
   },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
+  webView: {
+    flex: 1
   },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-  },
-  highlight: {
-    fontWeight: '700',
-  },
+  flexContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    height: Dimensions.get("window").height
+  }
 });
 
 export default App;

@@ -1,17 +1,23 @@
 {
   "name": "churchplus",
-  "version": "0.0.1",
+  "version": "1.0.3",
   "private": true,
   "scripts": {
     "android": "react-native run-android",
     "ios": "react-native run-ios",
     "lint": "eslint .",
     "start": "react-native start",
-    "test": "jest"
+    "test": "jest",
+    "version": "npx react-native-version --never-amend",
+    "predebug": "npx react-native bundle --platform android --dev false --entry-file index.js --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res",
+    "builddebugandroid": "cd android && ./gradlew assembleDebug",
+    "buildprodandroid": "cd android && ./gradlew clean && ./gradlew :app:bundleRelease"
   },
   "dependencies": {
     "react": "18.2.0",
-    "react-native": "0.74.1"
+    "react-native": "0.74.1",
+    "react-native-animatable": "^1.4.0",
+    "react-native-webview": "^13.10.2"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
