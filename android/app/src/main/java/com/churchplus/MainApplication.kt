@@ -1,4 +1,4 @@
-package com.churchplus
+package com.complustech.co
 
 import android.app.Application
 import com.facebook.react.PackageList
